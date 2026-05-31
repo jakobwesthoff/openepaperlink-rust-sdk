@@ -51,6 +51,12 @@ impl FromStr for Mac {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if !s.is_ascii() {
+            return Err(Error::InvalidMac {
+                reason: "expected ASCII hex characters".to_string(),
+            });
+        }
+
         let hex_len = s.len();
         if hex_len != 12 && hex_len != 16 {
             return Err(Error::InvalidMac {
@@ -170,6 +176,12 @@ mod tests {
     fn reject_invalid_hex() {
         assert!("GGHHIIJJKKLL".parse::<Mac>().is_err());
         assert!("00007E23907FBX99".parse::<Mac>().is_err());
+    }
+
+    #[test]
+    fn reject_multibyte_utf8_without_panic() {
+        // "€€€€" is 12 bytes but not ASCII — must not panic on slice
+        assert!("€€€€".parse::<Mac>().is_err());
     }
 
     #[test]

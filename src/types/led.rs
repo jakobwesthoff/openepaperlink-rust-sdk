@@ -16,6 +16,12 @@ impl LedFlashPattern {
 
     /// Parse a 24-character hex string into a pattern.
     pub fn from_hex(hex: &str) -> Result<Self, Error> {
+        if !hex.is_ascii() {
+            return Err(Error::InvalidLedPattern {
+                reason: "expected ASCII hex characters".to_string(),
+            });
+        }
+
         if hex.len() != 24 {
             return Err(Error::InvalidLedPattern {
                 reason: format!("expected 24 hex characters, got {}", hex.len()),
@@ -76,6 +82,12 @@ mod tests {
     #[test]
     fn reject_invalid_hex() {
         assert!(LedFlashPattern::from_hex("GGHHIIJJKKLLMMNNOOPP0000").is_err());
+    }
+
+    #[test]
+    fn reject_multibyte_utf8_without_panic() {
+        // "€€€€€€€€" is 24 bytes but not ASCII — must not panic on slice
+        assert!(LedFlashPattern::from_hex("€€€€€€€€").is_err());
     }
 
     #[test]
