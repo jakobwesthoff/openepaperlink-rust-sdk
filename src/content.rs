@@ -27,10 +27,10 @@ impl Client {
             form = form.text("alias", alias.clone());
         }
         if let Some(rotate) = options.rotate {
-            form = form.text("rotate", rotate.to_string());
+            form = form.text("rotate", rotate.to_u8().to_string());
         }
         if let Some(lut) = options.lut {
-            form = form.text("lut", lut.to_string());
+            form = form.text("lut", lut.to_u8().to_string());
         }
         if let Some(invert) = options.invert {
             form = form.text("invert", if invert { "1" } else { "0" }.to_string());

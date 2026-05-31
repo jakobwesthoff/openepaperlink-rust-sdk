@@ -417,6 +417,114 @@ impl<'de> Deserialize<'de> for Rssi {
 }
 
 // =========================================================
+// Rotation
+// =========================================================
+
+/// Display rotation applied to the tag's screen content.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum Rotation {
+    /// No rotation (0°).
+    None,
+    /// 90° clockwise.
+    Cw90,
+    /// 180°.
+    Cw180,
+    /// 270° clockwise (90° counter-clockwise).
+    Cw270,
+    /// A rotation value not recognized by this SDK version.
+    Unknown(u8),
+}
+
+impl Rotation {
+    fn from_u8(v: u8) -> Self {
+        match v {
+            0 => Self::None,
+            1 => Self::Cw90,
+            2 => Self::Cw180,
+            3 => Self::Cw270,
+            other => Self::Unknown(other),
+        }
+    }
+
+    pub(crate) fn to_u8(self) -> u8 {
+        match self {
+            Self::None => 0,
+            Self::Cw90 => 1,
+            Self::Cw180 => 2,
+            Self::Cw270 => 3,
+            Self::Unknown(v) => v,
+        }
+    }
+}
+
+impl Serialize for Rotation {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u8(self.to_u8())
+    }
+}
+
+impl<'de> Deserialize<'de> for Rotation {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(Self::from_u8(u8::deserialize(deserializer)?))
+    }
+}
+
+// =========================================================
+// LUT Mode
+// =========================================================
+
+/// Display refresh mode (Look-Up Table selection).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum LutMode {
+    /// Automatic selection (full refresh when needed).
+    Auto,
+    /// Always perform a full display refresh.
+    FullRefresh,
+    /// Fast partial refresh without red/yellow colors.
+    Fast,
+    /// Fastest refresh with visible ghosting artifacts.
+    Fastest,
+    /// A LUT mode not recognized by this SDK version.
+    Unknown(u8),
+}
+
+impl LutMode {
+    fn from_u8(v: u8) -> Self {
+        match v {
+            0 => Self::Auto,
+            1 => Self::FullRefresh,
+            2 => Self::Fast,
+            3 => Self::Fastest,
+            other => Self::Unknown(other),
+        }
+    }
+
+    pub(crate) fn to_u8(self) -> u8 {
+        match self {
+            Self::Auto => 0,
+            Self::FullRefresh => 1,
+            Self::Fast => 2,
+            Self::Fastest => 3,
+            Self::Unknown(v) => v,
+        }
+    }
+}
+
+impl Serialize for LutMode {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u8(self.to_u8())
+    }
+}
+
+impl<'de> Deserialize<'de> for LutMode {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        Ok(Self::from_u8(u8::deserialize(deserializer)?))
+    }
+}
+
+// =========================================================
 // Tag Record
 // =========================================================
 
@@ -475,11 +583,11 @@ pub struct TagRecord {
     /// IP address of the managing AP (meaningful when `is_external` is true).
     #[serde(rename = "apip")]
     pub ap_ip: String,
-    /// Display rotation (0 = 0°, 1 = 90°, 2 = 180°, 3 = 270°).
-    pub rotate: u8,
-    /// LUT refresh mode (0 = auto, 1 = full, 2 = fast, 3 = fastest).
-    pub lut: u8,
-    /// Color inversion (0 = normal, 1 = inverted).
+    /// Display rotation.
+    pub rotate: Rotation,
+    /// Display refresh mode.
+    pub lut: LutMode,
+    /// Color inversion.
     pub invert: u8,
     /// Total number of successful display updates.
     #[serde(rename = "updatecount")]
@@ -515,10 +623,10 @@ pub struct SaveTagConfig {
     pub alias: Option<String>,
     /// JSON-encoded mode-specific configuration.
     pub modecfgjson: Option<String>,
-    /// Display rotation (0–3).
-    pub rotate: Option<u8>,
-    /// LUT mode (0–3).
-    pub lut: Option<u8>,
+    /// Display rotation.
+    pub rotate: Option<Rotation>,
+    /// Display refresh mode.
+    pub lut: Option<LutMode>,
     /// Color inversion.
     pub invert: Option<bool>,
 }

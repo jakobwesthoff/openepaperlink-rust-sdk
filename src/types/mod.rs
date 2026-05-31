@@ -23,7 +23,8 @@ pub use led::LedFlashPattern;
 pub use mac::Mac;
 pub use system::{ApState, RunState, SystemHeartbeat, SystemInfo};
 pub use tag::{
-    Battery, ContentMode, NextCheckin, Rssi, SaveTagConfig, TagCommand, TagRecord, WakeupReason,
+    Battery, ContentMode, LutMode, NextCheckin, Rotation, Rssi, SaveTagConfig, TagCommand,
+    TagRecord, WakeupReason,
 };
 pub use ws_message::WsMessage;
 

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use super::serde_helpers::deserialize_string_or_int_u8;
+use super::serde_helpers::{deserialize_int_bool, deserialize_string_or_int_u8};
 
 // =========================================================
 // AP State
@@ -157,18 +157,18 @@ pub struct SystemInfo {
     pub rollback: bool,
     /// Radio module firmware version.
     pub ap_version: u16,
-    /// Has C6 module (0 or 1).
-    #[serde(rename = "hasC6")]
-    pub has_c6: u8,
-    /// Has H2 module (0 or 1).
-    #[serde(rename = "hasH2")]
-    pub has_h2: u8,
-    /// Has TLSR module (0 or 1).
-    #[serde(rename = "hasTslr")]
-    pub has_tlsr: u8,
-    /// Has external flasher (0 or 1).
-    #[serde(rename = "hasFlasher")]
-    pub has_flasher: u8,
+    /// Has C6 module.
+    #[serde(rename = "hasC6", deserialize_with = "deserialize_int_bool")]
+    pub has_c6: bool,
+    /// Has H2 module.
+    #[serde(rename = "hasH2", deserialize_with = "deserialize_int_bool")]
+    pub has_h2: bool,
+    /// Has TLSR module.
+    #[serde(rename = "hasTslr", deserialize_with = "deserialize_int_bool")]
+    pub has_tlsr: bool,
+    /// Has external flasher.
+    #[serde(rename = "hasFlasher", deserialize_with = "deserialize_int_bool")]
+    pub has_flasher: bool,
 }
 
 // =========================================================
@@ -266,7 +266,7 @@ mod tests {
 
         let info: SystemInfo = serde_json::from_str(json).unwrap();
         assert_eq!(info.buildversion, "2.85");
-        assert_eq!(info.has_c6, 1);
+        assert!(info.has_c6);
         assert!(info.rollback);
         assert_eq!(info.ap_version, 31);
     }

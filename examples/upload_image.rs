@@ -15,8 +15,8 @@ async fn main() {
     let mac: Mac = args[2].parse().expect("invalid MAC address");
     let image_path = &args[3];
 
-    let image_bytes = std::fs::read(image_path)
-        .unwrap_or_else(|e| panic!("failed to read {image_path}: {e}"));
+    let image_bytes =
+        std::fs::read(image_path).unwrap_or_else(|e| panic!("failed to read {image_path}: {e}"));
 
     println!(
         "Uploading {} ({} bytes) to tag {mac}...",

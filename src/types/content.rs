@@ -1,4 +1,4 @@
-use super::tag::ContentMode;
+use super::tag::{ContentMode, LutMode, Rotation};
 
 /// Options for uploading an image via `POST /imgupload`.
 ///
@@ -9,10 +9,10 @@ pub struct UploadImageOptions {
     pub dither: Option<u8>,
     /// Update the tag's alias simultaneously.
     pub alias: Option<String>,
-    /// Display rotation (0–3).
-    pub rotate: Option<u8>,
-    /// LUT mode (0–3).
-    pub lut: Option<u8>,
+    /// Display rotation.
+    pub rotate: Option<Rotation>,
+    /// Display refresh mode.
+    pub lut: Option<LutMode>,
     /// Color inversion.
     pub invert: Option<bool>,
     /// Content mode to set (default: external image).

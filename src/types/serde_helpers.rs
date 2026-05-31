@@ -58,6 +58,24 @@ where
     deserializer.deserialize_any(StringOrIntVisitor)
 }
 
+/// Deserializes an integer `0` or `1` into a `bool`.
+///
+/// Used for capability flags in the `sysinfo` response, which are
+/// numeric unlike the string-encoded flags in `get_ap_config`.
+pub(crate) fn deserialize_int_bool<'de, D>(deserializer: D) -> Result<bool, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let v = u8::deserialize(deserializer)?;
+    match v {
+        0 => Ok(false),
+        1 => Ok(true),
+        other => Err(de::Error::custom(format!(
+            "expected 0 or 1, got {other}"
+        ))),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

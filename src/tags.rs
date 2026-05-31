@@ -5,10 +5,12 @@ use crate::{Error, Mac, SaveTagConfig, TagCommand, TagRecord};
 impl Client {
     /// Retrieve all tags from the AP, following pagination automatically.
     pub async fn get_tags(&self) -> Result<Vec<TagRecord>, Error> {
+        const MAX_PAGES: u32 = 1024;
+
         let mut all_tags = Vec::new();
         let mut pos = 0u32;
 
-        loop {
+        for _ in 0..MAX_PAGES {
             let page = self.get_tags_page(pos).await?;
             all_tags.extend(page.tags);
 
@@ -17,6 +19,10 @@ impl Client {
                 _ => return Ok(all_tags),
             }
         }
+
+        Err(Error::Api {
+            message: format!("pagination exceeded {MAX_PAGES} pages"),
+        })
     }
 
     /// Retrieve a single tag by MAC address.
@@ -63,10 +69,10 @@ impl Client {
             params.push(("modecfgjson".to_string(), json.clone()));
         }
         if let Some(rotate) = config.rotate {
-            params.push(("rotate".to_string(), rotate.to_string()));
+            params.push(("rotate".to_string(), rotate.to_u8().to_string()));
         }
         if let Some(lut) = config.lut {
-            params.push(("lut".to_string(), lut.to_string()));
+            params.push(("lut".to_string(), lut.to_u8().to_string()));
         }
         if let Some(invert) = config.invert {
             params.push(("invert".to_string(), u8::from(invert).to_string()));

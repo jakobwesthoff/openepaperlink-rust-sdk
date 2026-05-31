@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use super::serde_helpers::deserialize_string_bool;
 use super::system::ApState;
@@ -7,7 +7,7 @@ use super::system::ApState;
 ///
 /// Merges compile-time capability flags (string `"0"`/`"1"` on the wire)
 /// with runtime settings from the AP's `apconfig.json`.
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ApConfig {
     /// Has ESP32-C6 radio module.
     #[serde(rename = "C6", deserialize_with = "deserialize_string_bool")]

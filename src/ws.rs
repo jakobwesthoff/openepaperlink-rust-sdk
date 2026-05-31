@@ -1,6 +1,7 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+use futures_util::stream::FusedStream;
 use futures_util::{Stream, StreamExt};
 use tokio_tungstenite::tungstenite::Message;
 
@@ -12,15 +13,32 @@ use crate::{Error, WsMessage};
 /// Yields `Result<WsMessage, Error>` items. JSON parse errors produce `Err`
 /// items without ending the stream. A clean close or connection drop ends
 /// the stream. Callers reconnect by calling [`Client::connect_ws`] again.
+///
+/// Implements [`FusedStream`] so it can be used directly in `tokio::select!`
+/// without wrapping in `.fuse()`.
 pub struct EventStream {
     inner: Pin<Box<dyn Stream<Item = Result<WsMessage, Error>> + Send>>,
+    terminated: bool,
 }
 
 impl Stream for EventStream {
     type Item = Result<WsMessage, Error>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        self.inner.as_mut().poll_next(cx)
+        if self.terminated {
+            return Poll::Ready(None);
+        }
+        let result = self.inner.as_mut().poll_next(cx);
+        if let Poll::Ready(None) = &result {
+            self.terminated = true;
+        }
+        result
+    }
+}
+
+impl FusedStream for EventStream {
+    fn is_terminated(&self) -> bool {
+        self.terminated
     }
 }
 
@@ -47,6 +65,7 @@ impl Client {
 
         Ok(EventStream {
             inner: Box::pin(stream),
+            terminated: false,
         })
     }
 }
