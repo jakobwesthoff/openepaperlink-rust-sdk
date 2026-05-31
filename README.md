@@ -62,9 +62,7 @@ async fn main() -> anyhow::Result<()> {
 - [`docs/openepaper-ap-web-protocol.md`](docs/openepaper-ap-web-protocol.md) — reverse-engineered API manual covering every HTTP endpoint, WebSocket message type, the raw image format, and the JSON template language
 - [`docs/adr/`](docs/adr/) — architectural decision records
 
-## Examples
-
-## Architecture
+## Source Code Structure
 
 `Client` is defined in `src/client.rs`. Its methods are split across domain files (`tags.rs`, `config.rs`, `system.rs`, `content.rs`, `led.rs`, `variables.rs`, `ws.rs`) using separate `impl Client` blocks. Wire types live in `src/types/`. See the [ADRs](docs/adr/) for the rationale.
 
