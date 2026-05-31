@@ -22,7 +22,11 @@ pub mod types;
 
 pub use client::{Client, ClientBuilder};
 pub use error::Error;
-pub use types::*;
+pub use types::{
+    ApConfig, ApListItem, ApState, Battery, ContentMode, LedFlashPattern, Mac, NextCheckin, Rssi,
+    RunState, SaveApConfig, SaveTagConfig, SystemHeartbeat, SystemInfo, TagCommand, TagRecord,
+    UploadImageOptions, WakeupReason, WsMessage,
+};
 pub use ws::EventStream;
 
 // Re-export StreamExt so callers can use .next() on EventStream without

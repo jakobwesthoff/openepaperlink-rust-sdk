@@ -93,6 +93,9 @@ impl ClientBuilder {
     }
 
     /// Use a pre-built [`reqwest::Client`] instead of constructing one.
+    ///
+    /// When set, the `timeout` and other builder settings that configure the
+    /// HTTP client are ignored — the provided client is used as-is.
     pub fn http_client(mut self, client: reqwest::Client) -> Self {
         self.http_client = Some(client);
         self
