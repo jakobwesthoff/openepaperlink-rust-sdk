@@ -21,8 +21,12 @@ impl Client {
                 let body = resp.text().await.unwrap_or_default();
                 self.check_response_body(&body)
             }
-            // Connection reset after the command was sent is expected
-            Err(e) if e.is_connect() || e.is_request() || e.is_body() => Ok(()),
+            // Connection reset after the AP starts rebooting is expected.
+            // is_connect() catches TCP-level resets, is_body() catches
+            // mid-response disconnects. is_request() is intentionally excluded
+            // because it also covers DNS failures and malformed URLs which
+            // should not be silenced.
+            Err(e) if e.is_connect() || e.is_body() => Ok(()),
             Err(e) => Err(e.into()),
         }
     }
