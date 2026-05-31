@@ -5,7 +5,7 @@ impl Client {
     /// Retrieve the AP's configuration (capability flags + runtime settings).
     pub async fn get_ap_config(&self) -> Result<ApConfig, Error> {
         let url = self.url("/get_ap_config");
-        let config: ApConfig = self.http.get(&url).send().await?.json().await?;
+        let config: ApConfig = self.http.get(&url).send().await?.error_for_status()?.json().await?;
         Ok(config)
     }
 
@@ -52,6 +52,7 @@ impl Client {
             .form(&params)
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)

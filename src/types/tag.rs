@@ -194,7 +194,7 @@ impl ContentMode {
         }
     }
 
-    fn to_u8(self) -> u8 {
+    pub(crate) fn to_u8(self) -> u8 {
         match self {
             Self::None => 0,
             Self::CurrentDate => 1,
@@ -501,8 +501,8 @@ pub(crate) struct TagDatabasePage {
 /// All fields are optional — only provided fields are updated.
 #[derive(Debug, Clone, Default)]
 pub struct SaveTagConfig {
-    /// Content mode ID to set.
-    pub content_mode: Option<u8>,
+    /// Content mode to set.
+    pub content_mode: Option<ContentMode>,
     /// Display name.
     pub alias: Option<String>,
     /// JSON-encoded mode-specific configuration.

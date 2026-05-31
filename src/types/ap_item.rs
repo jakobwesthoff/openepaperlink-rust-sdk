@@ -8,7 +8,7 @@ pub struct ApListItem {
     /// AP display name.
     pub alias: String,
     /// Number of tags managed by this AP.
-    pub count: u8,
+    pub count: u32,
     /// Radio channel (string-encoded).
     pub channel: String,
     /// Firmware version as 4-character hex string.

@@ -14,9 +14,7 @@ impl Client {
         let image_part = reqwest::multipart::Part::bytes(image_bytes)
             .file_name("image.jpg")
             .mime_str("image/jpeg")
-            .map_err(|e| Error::Api {
-                message: e.to_string(),
-            })?;
+            .expect("image/jpeg is a valid MIME type");
 
         let mut form = reqwest::multipart::Form::new()
             .text("mac", mac.to_string())
@@ -38,7 +36,7 @@ impl Client {
             form = form.text("invert", if invert { "1" } else { "0" }.to_string());
         }
         if let Some(mode) = options.content_mode {
-            form = form.text("contentmode", mode.to_string());
+            form = form.text("contentmode", mode.to_u8().to_string());
         }
         if let Some(ttl) = options.ttl {
             form = form.text("ttl", ttl.to_string());
@@ -50,6 +48,7 @@ impl Client {
             .multipart(form)
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)
@@ -77,6 +76,7 @@ impl Client {
             .form(&params)
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)

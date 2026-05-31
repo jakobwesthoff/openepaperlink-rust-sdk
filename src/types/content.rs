@@ -1,3 +1,5 @@
+use super::tag::ContentMode;
+
 /// Options for uploading an image via `POST /imgupload`.
 ///
 /// All fields are optional — the AP applies defaults for omitted fields.
@@ -13,8 +15,8 @@ pub struct UploadImageOptions {
     pub lut: Option<u8>,
     /// Color inversion.
     pub invert: Option<bool>,
-    /// Content mode to set (default: 24 = external image).
-    pub content_mode: Option<u8>,
+    /// Content mode to set (default: external image).
+    pub content_mode: Option<ContentMode>,
     /// Time to live in minutes (0 = no expiry).
     pub ttl: Option<u32>,
 }

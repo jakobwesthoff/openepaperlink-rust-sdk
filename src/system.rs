@@ -5,7 +5,7 @@ impl Client {
     /// Retrieve build-time and hardware information.
     pub async fn get_sysinfo(&self) -> Result<SystemInfo, Error> {
         let url = self.url("/sysinfo");
-        let info: SystemInfo = self.http.get(&url).send().await?.json().await?;
+        let info: SystemInfo = self.http.get(&url).send().await?.error_for_status()?.json().await?;
         Ok(info)
     }
 
@@ -22,7 +22,7 @@ impl Client {
                 self.check_response_body(&body)
             }
             // Connection reset after the command was sent is expected
-            Err(e) if e.is_connect() || e.is_request() => Ok(()),
+            Err(e) if e.is_connect() || e.is_request() || e.is_body() => Ok(()),
             Err(e) => Err(e.into()),
         }
     }
@@ -39,6 +39,7 @@ impl Client {
             .form(&[("epoch", epoch.to_string())])
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)

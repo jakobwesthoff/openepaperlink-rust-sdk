@@ -13,6 +13,7 @@ impl Client {
             .form(&[("key", key), ("val", value)])
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)
@@ -28,6 +29,7 @@ impl Client {
             .form(&[("json", &json_str)])
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)

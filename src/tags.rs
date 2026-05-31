@@ -22,7 +22,7 @@ impl Client {
     /// Retrieve a single tag by MAC address.
     pub async fn get_tag(&self, mac: &Mac) -> Result<TagRecord, Error> {
         let url = self.url_with_params("/get_db", &[("mac", &mac.to_string())]);
-        let page: TagDatabasePage = self.http.get(&url).send().await?.json().await?;
+        let page: TagDatabasePage = self.http.get(&url).send().await?.error_for_status()?.json().await?;
 
         page.tags.into_iter().next().ok_or(Error::Api {
             message: format!("tag {mac} not found"),
@@ -38,6 +38,7 @@ impl Client {
             .form(&[("mac", mac.to_string()), ("cmd", cmd.as_str().to_string())])
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)
@@ -53,7 +54,7 @@ impl Client {
         let mut params = vec![("mac".to_string(), mac.to_string())];
 
         if let Some(mode) = config.content_mode {
-            params.push(("contentmode".to_string(), mode.to_string()));
+            params.push(("contentmode".to_string(), mode.to_u8().to_string()));
         }
         if let Some(ref alias) = config.alias {
             params.push(("alias".to_string(), alias.clone()));
@@ -77,6 +78,7 @@ impl Client {
             .form(&params)
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)
@@ -85,7 +87,7 @@ impl Client {
     /// Download the tag database as raw JSON bytes.
     pub async fn backup_db(&self) -> Result<Vec<u8>, Error> {
         let url = self.url("/backup_db");
-        let bytes = self.http.get(&url).send().await?.bytes().await?;
+        let bytes = self.http.get(&url).send().await?.error_for_status()?.bytes().await?;
         Ok(bytes.to_vec())
     }
 
@@ -95,9 +97,7 @@ impl Client {
         let part = reqwest::multipart::Part::bytes(data)
             .file_name("tagDB.json")
             .mime_str("application/json")
-            .map_err(|e| Error::Api {
-                message: e.to_string(),
-            })?;
+            .expect("application/json is a valid MIME type");
         let form = reqwest::multipart::Form::new().part("file", part);
 
         let body = self
@@ -106,6 +106,7 @@ impl Client {
             .multipart(form)
             .send()
             .await?
+            .error_for_status()?
             .text()
             .await?;
         self.check_response_body(&body)
@@ -114,7 +115,7 @@ impl Client {
     pub(crate) async fn get_tags_page(&self, pos: u32) -> Result<TagDatabasePage, Error> {
         let pos_str = pos.to_string();
         let url = self.url_with_params("/get_db", &[("pos", &pos_str)]);
-        let page: TagDatabasePage = self.http.get(&url).send().await?.json().await?;
+        let page: TagDatabasePage = self.http.get(&url).send().await?.error_for_status()?.json().await?;
         Ok(page)
     }
 }

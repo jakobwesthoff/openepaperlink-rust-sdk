@@ -13,12 +13,11 @@ pub struct Client {
 }
 
 impl Client {
-    /// Create a new builder for the given AP host (IP address or hostname).
-    pub fn builder(host: impl Into<String>) -> ClientBuilder {
+    /// Create a new builder for the given AP base URL (e.g. `http://192.168.1.100`).
+    pub fn builder(base_url: impl Into<String>) -> ClientBuilder {
         ClientBuilder {
-            host: host.into(),
+            base_url: base_url.into(),
             port: None,
-            secure: false,
             timeout: None,
             http_client: None,
         }
@@ -48,7 +47,7 @@ impl Client {
     /// `Err(Error::Api)` if it contains an error message.
     pub(crate) fn check_response_body(&self, body: &str) -> Result<(), Error> {
         let trimmed = body.trim();
-        if trimmed.starts_with("Error") || trimmed.starts_with("error") {
+        if trimmed.to_ascii_lowercase().starts_with("error") {
             return Err(Error::Api {
                 message: trimmed.to_string(),
             });
@@ -59,26 +58,21 @@ impl Client {
 
 /// Builder for [`Client`].
 pub struct ClientBuilder {
-    host: String,
+    base_url: String,
     port: Option<u16>,
-    secure: bool,
     timeout: Option<Duration>,
     http_client: Option<reqwest::Client>,
 }
 
 impl ClientBuilder {
-    /// Set a custom port (default: 80 for HTTP, 443 for HTTPS).
+    /// Override the port in the base URL.
+    ///
+    /// Replaces any existing port, or inserts one if none was present.
+    ///
+    /// TODO: IPv6 bracket addresses (e.g. `http://[::1]:8080`) are not
+    /// handled by the port-override logic and will produce a malformed URL.
     pub fn port(mut self, port: u16) -> Self {
         self.port = Some(port);
-        self
-    }
-
-    /// Use HTTPS/WSS instead of HTTP/WS.
-    ///
-    /// Requires the `rustls` or `native-tls` feature to be enabled.
-    #[cfg(any(feature = "rustls", feature = "native-tls"))]
-    pub fn secure(mut self, secure: bool) -> Self {
-        self.secure = secure;
         self
     }
 
@@ -96,19 +90,40 @@ impl ClientBuilder {
 
     /// Build the [`Client`].
     pub fn build(self) -> Result<Client, Error> {
-        let http_scheme = if self.secure { "https" } else { "http" };
-        let ws_scheme = if self.secure { "wss" } else { "ws" };
-        let default_port = if self.secure { 443 } else { 80 };
-        let port = self.port.unwrap_or(default_port);
+        // Strip a single trailing slash so callers who write
+        // "http://192.168.1.100/" and those who don't get the same result.
+        let raw = self.base_url.strip_suffix('/').unwrap_or(&self.base_url);
 
-        let port_suffix = if port == default_port {
-            String::new()
+        // Apply a port override by rewriting the authority portion of the URL.
+        // We split on "://" to isolate the scheme, then further split the
+        // authority (host[:port]) from any trailing path.
+        let base_url = if let Some(port) = self.port {
+            let (scheme, rest) = raw.split_once("://").ok_or_else(|| Error::ClientBuild {
+                reason: format!("base URL has no scheme: {raw}"),
+            })?;
+            // Split authority from any path that follows it.
+            let (authority, path) = rest
+                .split_once('/')
+                .map(|(a, p)| (a, format!("/{p}")))
+                .unwrap_or((rest, String::new()));
+            // Drop any existing port from the authority.
+            let host = authority.split_once(':').map_or(authority, |(h, _)| h);
+            format!("{scheme}://{host}:{port}{path}")
         } else {
-            format!(":{port}")
+            raw.to_string()
         };
 
-        let base_url = format!("{http_scheme}://{}{port_suffix}", self.host);
-        let ws_url = format!("{ws_scheme}://{}{port_suffix}/ws", self.host);
+        // Derive the WebSocket URL by swapping the scheme. We check for
+        // "https://" before "http://" to avoid a prefix collision.
+        let ws_url = if let Some(rest) = base_url.strip_prefix("https://") {
+            format!("wss://{rest}/ws")
+        } else if let Some(rest) = base_url.strip_prefix("http://") {
+            format!("ws://{rest}/ws")
+        } else {
+            return Err(Error::ClientBuild {
+                reason: format!("base URL must start with http:// or https://: {base_url}"),
+            });
+        };
 
         let http = match self.http_client {
             Some(client) => client,

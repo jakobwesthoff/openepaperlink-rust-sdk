@@ -8,7 +8,7 @@ impl Client {
             "/led_flash",
             &[("mac", &mac.to_string()), ("pattern", &pattern.to_hex())],
         );
-        let body = self.http.get(&url).send().await?.text().await?;
+        let body = self.http.get(&url).send().await?.error_for_status()?.text().await?;
         self.check_response_body(&body)
     }
 
