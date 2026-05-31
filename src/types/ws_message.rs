@@ -67,17 +67,26 @@ impl<'de> Deserialize<'de> for WsMessage {
         }
 
         if let Some(value) = map.get("logMsg") {
-            let msg = value.as_str().unwrap_or_default().to_string();
+            let msg = value
+                .as_str()
+                .ok_or_else(|| serde::de::Error::custom("logMsg value is not a string"))?
+                .to_string();
             return Ok(WsMessage::Log(msg));
         }
 
         if let Some(value) = map.get("errMsg") {
-            let msg = value.as_str().unwrap_or_default().to_string();
+            let msg = value
+                .as_str()
+                .ok_or_else(|| serde::de::Error::custom("errMsg value is not a string"))?
+                .to_string();
             return Ok(WsMessage::Error(msg));
         }
 
         if let Some(value) = map.get("console") {
-            let text = value.as_str().unwrap_or_default().to_string();
+            let text = value
+                .as_str()
+                .ok_or_else(|| serde::de::Error::custom("console value is not a string"))?
+                .to_string();
             let color = map.get("color").and_then(|v| v.as_str()).map(String::from);
             return Ok(WsMessage::Console { text, color });
         }
@@ -167,6 +176,27 @@ mod tests {
             }
             other => panic!("expected ApItem, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn non_string_log_value_is_error() {
+        let json = r#"{"logMsg": 42}"#;
+        let result = serde_json::from_str::<WsMessage>(json);
+        assert!(result.is_err(), "non-string logMsg should produce a deserialization error");
+    }
+
+    #[test]
+    fn non_string_error_value_is_error() {
+        let json = r#"{"errMsg": ["not", "a", "string"]}"#;
+        let result = serde_json::from_str::<WsMessage>(json);
+        assert!(result.is_err(), "non-string errMsg should produce a deserialization error");
+    }
+
+    #[test]
+    fn non_string_console_value_is_error() {
+        let json = r#"{"console": {"nested": true}}"#;
+        let result = serde_json::from_str::<WsMessage>(json);
+        assert!(result.is_err(), "non-string console should produce a deserialization error");
     }
 
     #[test]
