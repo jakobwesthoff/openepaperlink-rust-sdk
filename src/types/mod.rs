@@ -13,6 +13,8 @@ pub(crate) mod serde_helpers;
 mod system;
 /// Tag-related types: records, enumerations, sentinel types.
 mod tag;
+/// WebSocket message enum.
+mod ws_message;
 
 pub use ap_item::ApListItem;
 pub use config::{ApConfig, SaveApConfig};
@@ -23,6 +25,7 @@ pub use system::{ApState, RunState, SystemHeartbeat, SystemInfo};
 pub use tag::{
     Battery, ContentMode, NextCheckin, Rssi, SaveTagConfig, TagCommand, TagRecord, WakeupReason,
 };
+pub use ws_message::WsMessage;
 
 // Used by Client::get_tags_page() in src/tags.rs.
 #[allow(unused_imports)]
