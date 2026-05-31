@@ -13,9 +13,6 @@ use serde::{Deserialize, Deserializer, de};
 ///
 /// Used for capability flags in the `get_ap_config` response, which are
 /// always string-encoded despite being boolean values.
-// Used by ApConfig (Phase 3) via #[serde(deserialize_with)]. Not referenced
-// at the function level until then.
-#[allow(dead_code)]
 pub(crate) fn deserialize_string_bool<'de, D>(deserializer: D) -> Result<bool, D::Error>
 where
     D: Deserializer<'de>,

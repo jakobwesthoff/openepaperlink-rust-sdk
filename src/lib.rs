@@ -9,9 +9,12 @@
 
 mod client;
 mod config;
+mod content;
 mod error;
+mod led;
 mod system;
 mod tags;
+mod variables;
 
 /// Wire-format types for all API requests and responses.
 pub mod types;
