@@ -487,8 +487,6 @@ pub struct TagRecord {
 
 /// Internal pagination response from `GET /get_db`.
 #[derive(Debug, Clone, Deserialize)]
-// Used by Client::get_tags_page() in src/tags.rs.
-#[allow(dead_code)]
 pub(crate) struct TagDatabasePage {
     /// Tag records in this page.
     pub tags: Vec<TagRecord>,

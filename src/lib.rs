@@ -15,6 +15,7 @@ mod led;
 mod system;
 mod tags;
 mod variables;
+mod ws;
 
 /// Wire-format types for all API requests and responses.
 pub mod types;
@@ -22,3 +23,8 @@ pub mod types;
 pub use client::{Client, ClientBuilder};
 pub use error::Error;
 pub use types::*;
+pub use ws::EventStream;
+
+// Re-export StreamExt so callers can use .next() on EventStream without
+// adding futures-util as a direct dependency.
+pub use futures_util::StreamExt;

@@ -27,6 +27,4 @@ pub use tag::{
 };
 pub use ws_message::WsMessage;
 
-// Used by Client::get_tags_page() in src/tags.rs.
-#[allow(unused_imports)]
 pub(crate) use tag::TagDatabasePage;
