@@ -1,14 +1,16 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+#![deny(missing_docs)]
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+//! Rust SDK for communicating with
+//! [OpenEPaperLink](https://github.com/OpenEPaperLink/OpenEPaperLink) access
+//! points.
+//!
+//! Provides typed HTTP and WebSocket clients for managing e-paper tags,
+//! configuring the AP, uploading images, and subscribing to real-time events.
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+mod error;
+
+/// Wire-format types for all API requests and responses.
+pub mod types;
+
+pub use error::Error;
+pub use types::*;
