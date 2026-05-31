@@ -11,7 +11,7 @@ use openepaperlink_sdk::{Client, StreamExt};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let client = Client::builder("192.168.1.100").build()?;
+    let client = Client::builder("http://192.168.1.100").build()?;
 
     // List all known tags
     let tags = client.get_tags().await?;
@@ -29,7 +29,7 @@ async fn main() -> anyhow::Result<()> {
 }
 ```
 
-`Client::builder` takes a hostname or IP address. Chain `.port(8080)` or `.timeout(Duration::from_secs(5))` before `.build()` if needed.
+`Client::builder` takes a base URL. Chain `.port(8080)` or `.timeout(Duration::from_secs(5))` before `.build()` if needed. Enable the `rustls` or `native-tls` feature for `https://` support.
 
 ## What's in the box
 
@@ -64,7 +64,13 @@ async fn main() -> anyhow::Result<()> {
 
 ## Examples
 
-Run any example with `cargo run --example <name> -- <AP_HOST>`:
+## Architecture
+
+`Client` is defined in `src/client.rs`. Its methods are split across domain files (`tags.rs`, `config.rs`, `system.rs`, `content.rs`, `led.rs`, `variables.rs`, `ws.rs`) using separate `impl Client` blocks. Wire types live in `src/types/`. See the [ADRs](docs/adr/) for the rationale.
+
+## Examples
+
+Run any example with `cargo run --example <name> -- <AP_URL>`:
 
 | Example | What it does |
 |---|---|

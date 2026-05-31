@@ -1,3 +1,5 @@
+//! System-level operations: build info, reboot, and time synchronization.
+
 use crate::client::Client;
 use crate::{Error, SystemInfo};
 

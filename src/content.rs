@@ -1,3 +1,5 @@
+//! Content uploads: pushing images and JSON templates to tags.
+
 use crate::client::Client;
 use crate::{Error, Mac, UploadImageOptions};
 

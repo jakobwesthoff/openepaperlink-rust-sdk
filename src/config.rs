@@ -1,3 +1,6 @@
+//! AP configuration: reading capability flags and runtime settings, saving
+//! config changes.
+
 use crate::client::Client;
 use crate::{ApConfig, Error, SaveApConfig};
 

@@ -1,3 +1,5 @@
+//! AP variable store: setting key-value pairs used by JSON template rendering.
+
 use std::collections::HashMap;
 
 use crate::client::Client;

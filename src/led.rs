@@ -1,3 +1,5 @@
+//! LED flash control: sending patterns and stopping active sequences.
+
 use crate::client::Client;
 use crate::{Error, LedFlashPattern, Mac};
 

@@ -1,3 +1,6 @@
+//! WebSocket event stream: real-time tag updates, system heartbeats, log
+//! messages, and console output from the AP.
+
 use std::pin::Pin;
 use std::task::{Context, Poll};
 

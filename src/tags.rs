@@ -1,3 +1,6 @@
+//! Tag management: listing, querying, commands, config, and database
+//! backup/restore.
+
 use crate::client::Client;
 use crate::types::TagDatabasePage;
 use crate::{Error, Mac, SaveTagConfig, TagCommand, TagRecord};
