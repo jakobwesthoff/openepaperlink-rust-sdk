@@ -29,10 +29,20 @@ impl Client {
     }
 
     /// Build a URL with query parameters appended manually.
+    ///
+    /// Values are NOT percent-encoded. All current callers pass only hex
+    /// strings and numeric values which are URL-safe. If a future caller
+    /// needs to pass arbitrary strings, this method must be updated to
+    /// percent-encode values.
     pub(crate) fn url_with_params(&self, path: &str, params: &[(&str, &str)]) -> String {
         if params.is_empty() {
             return self.url(path);
         }
+        debug_assert!(
+            params.iter().all(|(k, v)| k.is_ascii() && v.is_ascii()
+                && !v.contains('&') && !v.contains('=') && !v.contains('?') && !v.contains('#')),
+            "url_with_params values must be URL-safe (no &, =, ?, #)"
+        );
         let query: Vec<String> = params
             .iter()
             .map(|(k, v)| format!("{k}={v}"))
