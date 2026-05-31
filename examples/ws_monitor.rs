@@ -4,7 +4,7 @@ use openepaperlink_sdk::{StreamExt, WsMessage};
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
-        eprintln!("Usage: ws_monitor <AP_HOST>");
+        eprintln!("Usage: ws_monitor <AP_URL>");
         std::process::exit(1);
     }
 
@@ -12,7 +12,7 @@ async fn main() {
         .build()
         .expect("failed to build client");
 
-    println!("Connecting to ws://{}...", args[1]);
+    println!("Connecting to {}...", args[1]);
     let mut stream = client
         .connect_ws()
         .await

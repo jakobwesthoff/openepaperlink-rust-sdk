@@ -4,7 +4,7 @@ use openepaperlink_sdk::{Mac, UploadImageOptions};
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 4 {
-        eprintln!("Usage: upload_image <AP_HOST> <MAC> <IMAGE_PATH>");
+        eprintln!("Usage: upload_image <AP_URL> <MAC> <IMAGE_PATH>");
         std::process::exit(1);
     }
 

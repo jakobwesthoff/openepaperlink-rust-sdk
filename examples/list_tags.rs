@@ -4,7 +4,7 @@ use openepaperlink_sdk::{Battery, ContentMode, NextCheckin, Rssi};
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
-        eprintln!("Usage: list_tags <AP_HOST>");
+        eprintln!("Usage: list_tags <AP_URL>");
         std::process::exit(1);
     }
 

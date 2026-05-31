@@ -4,7 +4,7 @@ use openepaperlink_sdk::{LedFlashPattern, Mac};
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 3 {
-        eprintln!("Usage: led_blink <AP_HOST> <MAC> [stop]");
+        eprintln!("Usage: led_blink <AP_URL> <MAC> [stop]");
         std::process::exit(1);
     }
 

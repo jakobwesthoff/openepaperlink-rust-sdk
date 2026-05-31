@@ -2,7 +2,7 @@
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
-        eprintln!("Usage: get_config <AP_HOST>");
+        eprintln!("Usage: get_config <AP_URL>");
         std::process::exit(1);
     }
 
