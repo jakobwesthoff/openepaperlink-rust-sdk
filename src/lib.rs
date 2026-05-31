@@ -7,10 +7,12 @@
 //! Provides typed HTTP and WebSocket clients for managing e-paper tags,
 //! configuring the AP, uploading images, and subscribing to real-time events.
 
+mod client;
 mod error;
 
 /// Wire-format types for all API requests and responses.
 pub mod types;
 
+pub use client::{Client, ClientBuilder};
 pub use error::Error;
 pub use types::*;
