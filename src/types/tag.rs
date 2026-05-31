@@ -639,7 +639,7 @@ mod tests {
 
     #[test]
     fn tag_record_from_live_ap_response() {
-        // Verbatim JSON from a live AP at 192.168.11.186 (firmware 2.85)
+        // Captured from a live OpenEPaperLink AP running firmware 2.85
         let json = r##"{"mac":"00007E23907FB299","hash":"4eaaf64af5f3dcc50000000000000000","lastseen":1780232916,"nextupdate":1780234085,"nextcheckin":1780232976,"pending":0,"alias":"","contentMode":4,"LQI":124,"RSSI":-62,"temperature":29,"batteryMv":3062,"hwType":51,"wakeupReason":0,"capabilities":225,"modecfgjson":"{\"location\":\"Zoutelande\",\"units\":\"0\",\"interval\":\"30\",\"#lat\":\"51.50167\",\"#lon\":\"3.48472\",\"#tz\":\"Europe/Amsterdam\"}","isexternal":false,"apip":"0.0.0.0","rotate":0,"lut":0,"invert":0,"updatecount":44,"updatelast":1780228711,"ch":11,"ver":41}"##;
 
         let tag: TagRecord = serde_json::from_str(json).unwrap();

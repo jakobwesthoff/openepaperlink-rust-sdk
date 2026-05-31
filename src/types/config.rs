@@ -129,7 +129,7 @@ mod tests {
 
     #[test]
     fn ap_config_from_live_ap_response() {
-        // Verbatim response from live AP at 192.168.11.186
+        // Captured from a live OpenEPaperLink AP
         let json = r#"{"C6": "1", "H2": "0", "TLSR": "0", "savespace": "0", "hasFlasher": "0", "hasBLE": "1", "hasSubGhz": "0","apstate": "1", "channel": 0, "subghzchannel": 0, "alias": "", "led": 0, "tft": 20, "language": 2, "maxsleep": 0, "stopsleep": 1, "preview": 1, "nightlyreboot": 1, "lock": 0, "wifipower": 34, "timezone": "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00", "sleeptime1": 0, "sleeptime2": 0, "ble": 0, "repo": "OpenEPaperLink/OpenEPaperLink", "env": "ESP32_S3_16_8_YELLOW_AP", "discovery": 0, "showtimestamp": 0}"#;
 
         let config: ApConfig = serde_json::from_str(json).unwrap();
