@@ -69,7 +69,7 @@ impl Client {
             params.push(("lut".to_string(), lut.to_string()));
         }
         if let Some(invert) = config.invert {
-            params.push(("invert".to_string(), invert.to_string()));
+            params.push(("invert".to_string(), u8::from(invert).to_string()));
         }
 
         let body = self

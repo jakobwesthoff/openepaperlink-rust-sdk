@@ -59,7 +59,7 @@ async fn main() {
             _ => "other",
         };
 
-        let checkin = match tag.nextcheckin {
+        let checkin = match tag.next_checkin {
             NextCheckin::DeepSleep => " [deep sleep]".to_string(),
             NextCheckin::At(_) => String::new(),
             _ => String::new(),

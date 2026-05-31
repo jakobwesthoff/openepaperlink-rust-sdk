@@ -432,11 +432,14 @@ pub struct TagRecord {
     /// MD5 hash of the current display image (32-char lowercase hex).
     pub hash: String,
     /// Unix timestamp of the tag's last check-in.
-    pub lastseen: u32,
+    #[serde(rename = "lastseen")]
+    pub last_seen: u32,
     /// Unix timestamp when the AP will next generate content for this tag.
-    pub nextupdate: u32,
+    #[serde(rename = "nextupdate")]
+    pub next_update: u32,
     /// When the tag is expected to next check in, or deep sleep.
-    pub nextcheckin: NextCheckin,
+    #[serde(rename = "nextcheckin")]
+    pub next_checkin: NextCheckin,
     /// Number of pending data transfers queued for this tag.
     pub pending: u16,
     /// User-assigned display name (empty string if unset).
@@ -464,11 +467,14 @@ pub struct TagRecord {
     /// Hardware capability bitmask.
     pub capabilities: u8,
     /// JSON-encoded content-mode-specific configuration.
-    pub modecfgjson: String,
+    #[serde(rename = "modecfgjson")]
+    pub mode_config_json: String,
     /// Whether this tag is managed by a different AP.
-    pub isexternal: bool,
-    /// IP address of the managing AP (meaningful when `isexternal` is true).
-    pub apip: String,
+    #[serde(rename = "isexternal")]
+    pub is_external: bool,
+    /// IP address of the managing AP (meaningful when `is_external` is true).
+    #[serde(rename = "apip")]
+    pub ap_ip: String,
     /// Display rotation (0 = 0°, 1 = 90°, 2 = 180°, 3 = 270°).
     pub rotate: u8,
     /// LUT refresh mode (0 = auto, 1 = full, 2 = fast, 3 = fastest).
@@ -476,9 +482,11 @@ pub struct TagRecord {
     /// Color inversion (0 = normal, 1 = inverted).
     pub invert: u8,
     /// Total number of successful display updates.
-    pub updatecount: u32,
+    #[serde(rename = "updatecount")]
+    pub update_count: u32,
     /// Unix timestamp of the last successful display update.
-    pub updatelast: u32,
+    #[serde(rename = "updatelast")]
+    pub update_last: u32,
     /// Radio channel the tag is currently using.
     pub ch: u8,
     /// Tag firmware version.
@@ -511,8 +519,8 @@ pub struct SaveTagConfig {
     pub rotate: Option<u8>,
     /// LUT mode (0–3).
     pub lut: Option<u8>,
-    /// Color inversion (0 or 1).
-    pub invert: Option<u8>,
+    /// Color inversion.
+    pub invert: Option<bool>,
 }
 
 #[cfg(test)]
@@ -649,10 +657,10 @@ mod tests {
         assert_eq!(tag.battery, Battery::Exact(3062));
         assert_eq!(tag.rssi, Rssi::Dbm(-62));
         assert_eq!(tag.wakeup_reason, WakeupReason::Timed);
-        assert_eq!(tag.nextcheckin, NextCheckin::At(1780232976));
+        assert_eq!(tag.next_checkin, NextCheckin::At(1780232976));
         assert_eq!(tag.hw_type, 51);
         assert_eq!(tag.ch, 11);
-        assert!(!tag.isexternal);
+        assert!(!tag.is_external);
     }
 
     #[test]
@@ -664,9 +672,9 @@ mod tests {
 
         assert_eq!(tag.battery, Battery::NotAvailable);
         assert_eq!(tag.content_mode, ContentMode::ApInfo);
-        assert_eq!(tag.nextcheckin, NextCheckin::At(1780232987));
+        assert_eq!(tag.next_checkin, NextCheckin::At(1780232987));
         // nextupdate is raw u32, not a sentinel type
-        assert_eq!(tag.nextupdate, 3216153600);
+        assert_eq!(tag.next_update, 3216153600);
     }
 
     #[test]

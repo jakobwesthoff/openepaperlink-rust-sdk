@@ -61,18 +61,25 @@ pub struct ApConfig {
     /// POSIX timezone string.
     pub timezone: String,
     /// Night mode start hour (0–23).
+    #[serde(default)]
     pub sleeptime1: u8,
     /// Night mode end hour (0–23).
+    #[serde(default)]
     pub sleeptime2: u8,
     /// BLE enabled.
+    #[serde(default)]
     pub ble: u8,
     /// GitHub repository for OTA updates.
+    #[serde(default)]
     pub repo: String,
     /// PlatformIO build environment name.
+    #[serde(default)]
     pub env: String,
     /// Discovery enabled.
+    #[serde(default)]
     pub discovery: u8,
     /// Show timestamps in UI.
+    #[serde(default)]
     pub showtimestamp: u8,
 }
 
