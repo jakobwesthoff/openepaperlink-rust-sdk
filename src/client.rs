@@ -6,17 +6,12 @@ use crate::Error;
 ///
 /// Constructed via [`Client::builder`]. Holds a reusable HTTP client and
 /// pre-computed base URLs for the AP.
-// All fields are used by the impl Client methods in tags.rs, config.rs,
-// system.rs, ws.rs, etc. — split across files via separate impl blocks.
-#[allow(dead_code)]
 pub struct Client {
     pub(crate) http: reqwest::Client,
     pub(crate) base_url: String,
     pub(crate) ws_url: String,
 }
 
-// Helpers are used by the impl Client methods across tags.rs, config.rs, etc.
-#[allow(dead_code)]
 impl Client {
     /// Create a new builder for the given AP host (IP address or hostname).
     pub fn builder(host: impl Into<String>) -> ClientBuilder {

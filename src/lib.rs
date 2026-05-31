@@ -8,7 +8,10 @@
 //! configuring the AP, uploading images, and subscribing to real-time events.
 
 mod client;
+mod config;
 mod error;
+mod system;
+mod tags;
 
 /// Wire-format types for all API requests and responses.
 pub mod types;
