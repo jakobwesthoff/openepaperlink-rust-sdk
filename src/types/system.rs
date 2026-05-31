@@ -132,6 +132,82 @@ impl<'de> Deserialize<'de> for RunState {
     }
 }
 
+// =========================================================
+// System Info (from GET /sysinfo)
+// =========================================================
+
+/// Build-time and hardware information from `GET /sysinfo`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SystemInfo {
+    /// AP display name.
+    pub alias: String,
+    /// PlatformIO build environment.
+    pub env: String,
+    /// Build timestamp (epoch seconds, encoded as string).
+    pub buildtime: String,
+    /// Firmware version string.
+    pub buildversion: String,
+    /// Git commit SHA.
+    pub sha: String,
+    /// PSRAM size in bytes.
+    pub psramsize: u32,
+    /// Flash chip size in bytes.
+    pub flashsize: u32,
+    /// Whether OTA rollback is available.
+    pub rollback: bool,
+    /// Radio module firmware version.
+    pub ap_version: u16,
+    /// Has C6 module (0 or 1).
+    #[serde(rename = "hasC6")]
+    pub has_c6: u8,
+    /// Has H2 module (0 or 1).
+    #[serde(rename = "hasH2")]
+    pub has_h2: u8,
+    /// Has TLSR module (0 or 1).
+    #[serde(rename = "hasTslr")]
+    pub has_tlsr: u8,
+    /// Has external flasher (0 or 1).
+    #[serde(rename = "hasFlasher")]
+    pub has_flasher: u8,
+}
+
+// =========================================================
+// System Heartbeat (WebSocket "sys" message)
+// =========================================================
+
+/// Runtime health metrics sent via WebSocket approximately every 5 seconds.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SystemHeartbeat {
+    /// Current Unix timestamp.
+    pub currtime: u32,
+    /// Free heap memory in bytes.
+    pub heap: u32,
+    /// Number of tags in database (cached, refreshed every 30s).
+    pub recordcount: u32,
+    /// Database memory usage in bytes.
+    pub dbsize: u32,
+    /// Free filesystem space in bytes (cached, refreshed every 30s).
+    pub littlefsfree: u64,
+    /// Free PSRAM in bytes. Only present on boards with PSRAM.
+    pub psfree: Option<u32>,
+    /// AP connection state.
+    pub apstate: ApState,
+    /// Operational run status.
+    pub runstate: RunState,
+    /// WiFi RSSI in dBm.
+    pub rssi: i32,
+    /// WiFi connection status.
+    pub wifistatus: u8,
+    /// Connected WiFi SSID.
+    pub wifissid: String,
+    /// System uptime in seconds.
+    pub uptime: u64,
+    /// Tags with low battery. Only present approximately once per 60 seconds.
+    pub lowbattcount: Option<u32>,
+    /// Timed-out tags. Only present approximately once per 60 seconds.
+    pub timeoutcount: Option<u32>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -182,5 +258,38 @@ mod tests {
         let json = serde_json::to_string(&original).unwrap();
         let back: RunState = serde_json::from_str(&json).unwrap();
         assert_eq!(back, original);
+    }
+
+    #[test]
+    fn system_info_from_live_ap_response() {
+        let json = r#"{"alias":"","env":"ESP32_S3_16_8_YELLOW_AP","buildtime":"1768750871","buildversion":"2.85","sha":"46c8b73fa0fd141e6a8a5652b1d855a2c1763924","psramsize":8383863,"flashsize":16777216,"rollback":true,"ap_version":31,"hasC6":1,"hasH2":0,"hasTslr":0,"hasFlasher":0}"#;
+
+        let info: SystemInfo = serde_json::from_str(json).unwrap();
+        assert_eq!(info.buildversion, "2.85");
+        assert_eq!(info.has_c6, 1);
+        assert!(info.rollback);
+        assert_eq!(info.ap_version, 31);
+    }
+
+    #[test]
+    fn system_heartbeat_without_optional_fields() {
+        let json = r#"{"currtime":1780232927,"heap":245760,"recordcount":3,"dbsize":98304,"littlefsfree":1048576,"apstate":1,"runstate":2,"rssi":-55,"wifistatus":3,"wifissid":"TestNetwork","uptime":86400}"#;
+
+        let hb: SystemHeartbeat = serde_json::from_str(json).unwrap();
+        assert_eq!(hb.apstate, ApState::Online);
+        assert_eq!(hb.runstate, RunState::Run);
+        assert_eq!(hb.psfree, None);
+        assert_eq!(hb.lowbattcount, None);
+        assert_eq!(hb.timeoutcount, None);
+    }
+
+    #[test]
+    fn system_heartbeat_with_optional_fields() {
+        let json = r#"{"currtime":1780232927,"heap":245760,"recordcount":3,"dbsize":98304,"littlefsfree":1048576,"psfree":4194304,"apstate":1,"runstate":2,"rssi":-55,"wifistatus":3,"wifissid":"TestNetwork","uptime":86400,"lowbattcount":2,"timeoutcount":1}"#;
+
+        let hb: SystemHeartbeat = serde_json::from_str(json).unwrap();
+        assert_eq!(hb.psfree, Some(4194304));
+        assert_eq!(hb.lowbattcount, Some(2));
+        assert_eq!(hb.timeoutcount, Some(1));
     }
 }

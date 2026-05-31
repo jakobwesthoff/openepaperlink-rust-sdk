@@ -1,5 +1,7 @@
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
+use super::Mac;
+
 // =========================================================
 // Wakeup Reason
 // =========================================================
@@ -414,6 +416,107 @@ impl<'de> Deserialize<'de> for Rssi {
     }
 }
 
+// =========================================================
+// Tag Record
+// =========================================================
+
+/// A tag's full status record as returned by the AP.
+///
+/// Corresponds to a single entry in the `GET /get_db` response or a
+/// WebSocket `tags` update. Field names on the wire use a mix of lowercase,
+/// camelCase, and uppercase — the serde renames handle the mapping.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TagRecord {
+    /// Tag MAC address.
+    pub mac: Mac,
+    /// MD5 hash of the current display image (32-char lowercase hex).
+    pub hash: String,
+    /// Unix timestamp of the tag's last check-in.
+    pub lastseen: u32,
+    /// Unix timestamp when the AP will next generate content for this tag.
+    pub nextupdate: u32,
+    /// When the tag is expected to next check in, or deep sleep.
+    pub nextcheckin: NextCheckin,
+    /// Number of pending data transfers queued for this tag.
+    pub pending: u16,
+    /// User-assigned display name (empty string if unset).
+    pub alias: String,
+    /// What the AP renders for this tag's display.
+    #[serde(rename = "contentMode")]
+    pub content_mode: ContentMode,
+    /// Link Quality Indicator (0–255).
+    #[serde(rename = "LQI")]
+    pub lqi: u8,
+    /// Received signal strength.
+    #[serde(rename = "RSSI")]
+    pub rssi: Rssi,
+    /// Tag-reported temperature in °C.
+    pub temperature: i8,
+    /// Battery voltage with sentinel values decoded.
+    #[serde(rename = "batteryMv")]
+    pub battery: Battery,
+    /// Hardware type ID, maps to a tag type descriptor file.
+    #[serde(rename = "hwType")]
+    pub hw_type: u8,
+    /// Why the tag last woke up from sleep.
+    #[serde(rename = "wakeupReason")]
+    pub wakeup_reason: WakeupReason,
+    /// Hardware capability bitmask.
+    pub capabilities: u8,
+    /// JSON-encoded content-mode-specific configuration.
+    pub modecfgjson: String,
+    /// Whether this tag is managed by a different AP.
+    pub isexternal: bool,
+    /// IP address of the managing AP (meaningful when `isexternal` is true).
+    pub apip: String,
+    /// Display rotation (0 = 0°, 1 = 90°, 2 = 180°, 3 = 270°).
+    pub rotate: u8,
+    /// LUT refresh mode (0 = auto, 1 = full, 2 = fast, 3 = fastest).
+    pub lut: u8,
+    /// Color inversion (0 = normal, 1 = inverted).
+    pub invert: u8,
+    /// Total number of successful display updates.
+    pub updatecount: u32,
+    /// Unix timestamp of the last successful display update.
+    pub updatelast: u32,
+    /// Radio channel the tag is currently using.
+    pub ch: u8,
+    /// Tag firmware version.
+    pub ver: u16,
+}
+
+/// Internal pagination response from `GET /get_db`.
+#[derive(Debug, Clone, Deserialize)]
+// Used by Client::get_tags_page() in src/tags.rs.
+#[allow(dead_code)]
+pub(crate) struct TagDatabasePage {
+    /// Tag records in this page.
+    pub tags: Vec<TagRecord>,
+    /// If present, the offset for the next page request. Absent on the last page.
+    /// The wire field is intentionally misspelled as "continu" by the AP.
+    #[serde(rename = "continu")]
+    pub continuation: Option<u32>,
+}
+
+/// Configuration to save for a tag via `POST /save_cfg`.
+///
+/// All fields are optional — only provided fields are updated.
+#[derive(Debug, Clone, Default)]
+pub struct SaveTagConfig {
+    /// Content mode ID to set.
+    pub content_mode: Option<u8>,
+    /// Display name.
+    pub alias: Option<String>,
+    /// JSON-encoded mode-specific configuration.
+    pub modecfgjson: Option<String>,
+    /// Display rotation (0–3).
+    pub rotate: Option<u8>,
+    /// LUT mode (0–3).
+    pub lut: Option<u8>,
+    /// Color inversion (0 or 1).
+    pub invert: Option<u8>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -532,5 +635,56 @@ mod tests {
         let val: Rssi = serde_json::from_str("-62").unwrap();
         assert_eq!(val, Rssi::Dbm(-62));
         assert_eq!(serde_json::to_string(&val).unwrap(), "-62");
+    }
+
+    // --- TagRecord from real AP fixture ---
+
+    #[test]
+    fn tag_record_from_live_ap_response() {
+        // Verbatim JSON from a live AP at 192.168.11.186 (firmware 2.85)
+        let json = r##"{"mac":"00007E23907FB299","hash":"4eaaf64af5f3dcc50000000000000000","lastseen":1780232916,"nextupdate":1780234085,"nextcheckin":1780232976,"pending":0,"alias":"","contentMode":4,"LQI":124,"RSSI":-62,"temperature":29,"batteryMv":3062,"hwType":51,"wakeupReason":0,"capabilities":225,"modecfgjson":"{\"location\":\"Zoutelande\",\"units\":\"0\",\"interval\":\"30\",\"#lat\":\"51.50167\",\"#lon\":\"3.48472\",\"#tz\":\"Europe/Amsterdam\"}","isexternal":false,"apip":"0.0.0.0","rotate":0,"lut":0,"invert":0,"updatecount":44,"updatelast":1780228711,"ch":11,"ver":41}"##;
+
+        let tag: TagRecord = serde_json::from_str(json).unwrap();
+
+        assert_eq!(tag.mac.to_string(), "00007E23907FB299");
+        assert_eq!(tag.content_mode, ContentMode::CurrentWeather);
+        assert_eq!(tag.battery, Battery::Exact(3062));
+        assert_eq!(tag.rssi, Rssi::Dbm(-62));
+        assert_eq!(tag.wakeup_reason, WakeupReason::Timed);
+        assert_eq!(tag.nextcheckin, NextCheckin::At(1780232976));
+        assert_eq!(tag.hw_type, 51);
+        assert_eq!(tag.ch, 11);
+        assert!(!tag.isexternal);
+    }
+
+    #[test]
+    fn tag_record_with_deep_sleep_sentinel() {
+        // Tag with nextupdate = deep sleep sentinel and battery = 0 (not available)
+        let json = r#"{"mac":"000060260FB0CD34","hash":"00000000000000000000000000000000","lastseen":1780232927,"nextupdate":3216153600,"nextcheckin":1780232987,"pending":0,"alias":"","contentMode":21,"LQI":0,"RSSI":-60,"temperature":0,"batteryMv":0,"hwType":224,"wakeupReason":0,"capabilities":0,"modecfgjson":"{}","isexternal":false,"apip":"0.0.0.0","rotate":0,"lut":0,"invert":0,"updatecount":0,"updatelast":0,"ch":0,"ver":0}"#;
+
+        let tag: TagRecord = serde_json::from_str(json).unwrap();
+
+        assert_eq!(tag.battery, Battery::NotAvailable);
+        assert_eq!(tag.content_mode, ContentMode::ApInfo);
+        assert_eq!(tag.nextcheckin, NextCheckin::At(1780232987));
+        // nextupdate is raw u32, not a sentinel type
+        assert_eq!(tag.nextupdate, 3216153600);
+    }
+
+    #[test]
+    fn tag_database_page_with_continuation() {
+        let json = r#"{"tags":[{"mac":"00007E23907FB299","hash":"aabb","lastseen":0,"nextupdate":0,"nextcheckin":0,"pending":0,"alias":"","contentMode":0,"LQI":0,"RSSI":0,"temperature":0,"batteryMv":0,"hwType":0,"wakeupReason":0,"capabilities":0,"modecfgjson":"","isexternal":false,"apip":"0.0.0.0","rotate":0,"lut":0,"invert":0,"updatecount":0,"updatelast":0,"ch":0,"ver":0}],"continu":25}"#;
+
+        let page: TagDatabasePage = serde_json::from_str(json).unwrap();
+        assert_eq!(page.tags.len(), 1);
+        assert_eq!(page.continuation, Some(25));
+    }
+
+    #[test]
+    fn tag_database_page_without_continuation() {
+        let json = r#"{"tags":[]}"#;
+        let page: TagDatabasePage = serde_json::from_str(json).unwrap();
+        assert!(page.tags.is_empty());
+        assert_eq!(page.continuation, None);
     }
 }
