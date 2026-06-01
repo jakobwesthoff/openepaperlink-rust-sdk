@@ -22,6 +22,12 @@ thiserror = "2"
 futures-util = { version = "0.3", default-features = false, features = ["alloc"] }
 
 [dev-dependencies]
+clap = { version = "4.6.1", features = ["derive"] }
+# Image decoding/resizing for the video_wall example. Only the common input
+# formats are enabled (plus PNG for preview output); the heavy AVIF/EXR encoders
+# from the default feature set are intentionally excluded.
+image = { version = "0.25.9", default-features = false, features = ["png", "jpeg", "webp", "bmp", "gif"] }
+jpeg-encoder = "0.6.1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 [features]
