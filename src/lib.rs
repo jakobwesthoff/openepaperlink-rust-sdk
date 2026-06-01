@@ -70,9 +70,9 @@ pub mod types;
 pub use client::{Client, ClientBuilder};
 pub use error::Error;
 pub use types::{
-    ApConfig, ApListItem, ApState, Battery, ContentMode, LedFlashPattern, LutMode, Mac,
+    ApConfig, ApListItem, ApState, Battery, ColorEntry, ContentMode, LedFlashPattern, LutMode, Mac,
     NextCheckin, Rotation, Rssi, RunState, SaveApConfig, SaveTagConfig, SystemHeartbeat,
-    SystemInfo, TagCommand, TagRecord, UploadImageOptions, WakeupReason, WsMessage,
+    SystemInfo, TagCommand, TagRecord, TagType, UploadImageOptions, WakeupReason, WsMessage,
 };
 pub use ws::EventStream;
 

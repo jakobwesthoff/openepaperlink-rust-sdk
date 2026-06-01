@@ -13,6 +13,8 @@ pub(crate) mod serde_helpers;
 mod system;
 /// Tag-related types: records, enumerations, sentinel types.
 mod tag;
+/// Tag type descriptors: display dimensions and color palettes.
+mod tag_type;
 /// WebSocket message enum.
 mod ws_message;
 
@@ -26,6 +28,7 @@ pub use tag::{
     Battery, ContentMode, LutMode, NextCheckin, Rotation, Rssi, SaveTagConfig, TagCommand,
     TagRecord, WakeupReason,
 };
+pub use tag_type::{ColorEntry, TagType};
 pub use ws_message::WsMessage;
 
 pub(crate) use tag::TagDatabasePage;
