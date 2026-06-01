@@ -8,6 +8,8 @@
   color palette) via `GET /tagtypes/<HH>.json`, plus `TagType` and `ColorEntry`
   types exposing width/height/bpp, the `colortable`/`perceptual` palettes, and
   supported `contentids`
+- `video_wall` example: spans one image across a grid of tags, dithering it
+  (Floyd–Steinberg) against the panel's real palette and uploading per-tag tiles
 
 ## 0.9.0 — 2026-05-31
 
