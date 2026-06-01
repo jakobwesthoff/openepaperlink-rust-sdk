@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `get_tag_type` to fetch a tag type's display descriptor (dimensions and
+  color palette) via `GET /tagtypes/<HH>.json`, plus `TagType` and `ColorEntry`
+  types exposing width/height/bpp, the `colortable`/`perceptual` palettes, and
+  supported `contentids`
+
 ## 0.9.0 — 2026-05-31
 
 Initial release.

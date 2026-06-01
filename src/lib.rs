@@ -61,6 +61,7 @@ mod error;
 mod led;
 mod system;
 mod tags;
+mod tagtypes;
 mod variables;
 mod ws;
 
