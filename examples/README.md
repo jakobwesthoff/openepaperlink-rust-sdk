@@ -71,6 +71,8 @@ comma-separated list of tag MACs. All tags must be the same hardware type.
 `--padding` skips a bezel border around every tag so the image reads as
 continuous across the physical gaps between panels. `--preview` additionally
 writes a PNG of the composed result (tile boundaries outlined) for inspection.
+`--dry-run` runs the whole pipeline but uploads nothing — pair it with
+`--preview` to check the result before sending it to the tags.
 
 ```sh
 # A 2×2 wall
@@ -82,4 +84,9 @@ cargo run --example video_wall -- http://192.168.1.100 mural.jpg \
 cargo run --example video_wall -- http://192.168.1.100 panorama.png \
   --row 00007E231842B297,00007E231842B298,00007E231842B299 \
   --padding 8 --preview wall-preview.png
+
+# Preview the result without uploading anything
+cargo run --example video_wall -- http://192.168.1.100 panorama.png \
+  --row 00007E231842B297,00007E231842B298,00007E231842B299 \
+  --preview wall-preview.png --dry-run
 ```

@@ -42,9 +42,13 @@ struct Cli {
     #[arg(long, default_value_t = 0)]
     padding: u32,
     /// Optional path to write a PNG preview of the composed, dithered canvas.
-    /// Uploads still proceed; this is additive, not a dry run.
+    /// Independent of `--dry-run`.
     #[arg(long, value_name = "PATH")]
     preview: Option<PathBuf>,
+    /// Run the whole pipeline (including encoding each tile) but skip the
+    /// uploads, so nothing is sent to the tags. Useful with `--preview`.
+    #[arg(long)]
+    dry_run: bool,
 }
 
 /// The wall's tags as a rectangular grid of MACs, row-major.
@@ -108,7 +112,7 @@ async fn run(cli: Cli) -> Result<ExitCode, String> {
         println!("preview written to {}", path.display());
     }
 
-    Ok(upload_tiles(&client, &wall, &grid, &emit_canvas).await)
+    Ok(upload_tiles(&client, &wall, &grid, &emit_canvas, cli.dry_run).await)
 }
 
 /// Parse and validate the `--row` arguments into a rectangular [`WallTags`].
@@ -230,11 +234,15 @@ fn write_preview(emit_canvas: &RgbImage, grid: &Grid, path: &PathBuf) -> Result<
 
 /// Cut and upload each tile sequentially. Continues past failed uploads,
 /// returning a success/failure exit code summarizing the run.
+///
+/// When `dry_run` is set, every tile is still cut and encoded (so sizing and
+/// encoding are exercised) but no upload is sent to the AP.
 async fn upload_tiles(
     client: &Client,
     wall: &WallTags,
     grid: &Grid,
     emit_canvas: &RgbImage,
+    dry_run: bool,
 ) -> ExitCode {
     // Disable the AP's own dithering: the canvas is already dithered, and the
     // tiles carry exact color keys for the AP to match 1:1.
@@ -254,6 +262,14 @@ async fn upload_tiles(
                 .to_image();
             let jpeg = encode::encode_jpeg_444(tile.as_raw(), rect.width as u16, rect.height as u16);
 
+            if dry_run {
+                println!(
+                    "  would upload {mac} (row {row}, col {col}, {} bytes)",
+                    jpeg.len(),
+                );
+                continue;
+            }
+
             match client.upload_image(&mac, jpeg, &options).await {
                 Ok(()) => println!("  uploaded {mac} (row {row}, col {col})"),
                 Err(e) => {
@@ -262,6 +278,11 @@ async fn upload_tiles(
                 }
             }
         }
+    }
+
+    if dry_run {
+        println!("dry run: {total} tiles encoded, nothing uploaded");
+        return ExitCode::SUCCESS;
     }
 
     let succeeded = total - failures.len();
