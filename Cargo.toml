@@ -1,33 +1,47 @@
 [package]
 name = "openepaperlink-sdk"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2024"
 license = "MIT"
 description = "Rust SDK for communicating with OpenEPaperLink access points — manage e-paper tags, upload images, and stream real-time events"
 repository = "https://github.com/jakobwesthoff/openepaperlink-rust-sdk"
 homepage = "https://github.com/jakobwesthoff/openepaperlink-rust-sdk"
-rust-version = "1.85"
 documentation = "https://docs.rs/openepaperlink-sdk"
 readme = "README.md"
 keywords = ["openepaperlink", "oepl", "eink", "epaper", "iot"]
 categories = ["api-bindings", "hardware-support"]
 
 [dependencies]
-reqwest = { version = "0.13", default-features = false, features = ["json", "multipart", "form"] }
-tokio-tungstenite = { version = "0.29", default-features = false, features = ["connect", "handshake"] }
+reqwest = { version = "0.13", default-features = false, features = [
+    "json",
+    "multipart",
+    "form",
+] }
+tokio-tungstenite = { version = "0.29", default-features = false, features = [
+    "connect",
+    "handshake",
+] }
 tokio = { version = "1", features = ["net", "time", "io-util", "sync"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
-futures-util = { version = "0.3", default-features = false, features = ["alloc"] }
+futures-util = { version = "0.3", default-features = false, features = [
+    "alloc",
+] }
 
 [dev-dependencies]
 clap = { version = "4.6.1", features = ["derive"] }
 # Image decoding/resizing for the video_wall example. Only the common input
 # formats are enabled (plus PNG for preview output); the heavy AVIF/EXR encoders
 # from the default feature set are intentionally excluded.
-image = { version = "0.25.9", default-features = false, features = ["png", "jpeg", "webp", "bmp", "gif"] }
-jpeg-encoder = "0.6.1"
+image = { version = "0.25.9", default-features = false, features = [
+    "png",
+    "jpeg",
+    "webp",
+    "bmp",
+    "gif",
+] }
+jpeg-encoder = "0.7.0"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 [features]

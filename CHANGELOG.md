@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.10.0 - 2026-06-01
+
+Provide access to tagtypes api and implement a more complex example using it
 
 ### Added
 
