@@ -78,6 +78,7 @@ Run any example with `cargo run --example <name> -- <AP_URL>`:
 | `get_config` | Dump system info and AP config to stdout |
 | `led_blink` | Flash a tag's LED (or stop an ongoing flash) |
 | `video_wall` | Span one image across a grid of tags, dithered against their real palette |
+| `tag_numbers` | Stamp a large `Tag #NNN` label onto every tag of a chosen hardware type |
 
 See [`examples/README.md`](examples/README.md) for per-example usage and invocations.
 

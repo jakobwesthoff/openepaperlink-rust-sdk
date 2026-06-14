@@ -90,3 +90,28 @@ cargo run --example video_wall -- http://192.168.1.100 panorama.png \
   --row 00007E231842B297,00007E231842B298,00007E231842B299 \
   --preview wall-preview.png --dry-run
 ```
+
+## `tag_numbers`
+
+Stamp a large identification label onto every tag of one hardware type. Each tag
+gets a full-frame `Tag #NNN` image with `Tag #` in black and a zero-padded
+sequential number (`001`, `002`, …) in red, scaled as large as the frame allows.
+The numbers are assigned in the order the AP lists the tags.
+
+The hardware type is named explicitly so there is no guessing which displays are
+addressed: every whitespace-separated term of the selector must appear in the tag
+type's name (case-insensitive), and the selector must resolve to exactly one
+type. `--font` points at any TrueType/OpenType font used to render the text, and
+`--padding` (pixels, default 8) sets the border kept clear around the maximised
+text on every side. Labels are emitted with the tag's exact color keys and the
+AP's dithering disabled, so a three-colour (black/white/red) display is required.
+
+```sh
+# Label every "Solum M3 BWR 2.9\"" tag, using Arial
+cargo run --example tag_numbers -- http://192.168.1.100 'M3 2.9"' \
+  --font /System/Library/Fonts/Supplemental/Arial.ttf
+
+# Give the text more breathing room around the frame edge
+cargo run --example tag_numbers -- http://192.168.1.100 'M3 2.9"' \
+  --font /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf --padding 16
+```

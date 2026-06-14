@@ -30,6 +30,7 @@ futures-util = { version = "0.3", default-features = false, features = [
 ] }
 
 [dev-dependencies]
+ab_glyph = "0.2.32"
 clap = { version = "4.6.1", features = ["derive"] }
 # Image decoding/resizing for the video_wall example. Only the common input
 # formats are enabled (plus PNG for preview output); the heavy AVIF/EXR encoders
