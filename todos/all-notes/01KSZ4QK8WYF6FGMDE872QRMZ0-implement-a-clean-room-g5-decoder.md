@@ -1,4 +1,13 @@
-# Clean-room G5 decoder implementation
+---
+title: "Implement a clean-room G5 decoder"
+kind: feature
+component: image-decode
+tags: [licensing]
+---
+# Implement a clean-room G5 decoder
+
+G5 image decompression for the `image-decode` feature must be implemented
+without using any BSL-licensed source code.
 
 ## Summary
 
@@ -14,9 +23,9 @@ fixed-length code size is determined by the image width
 (`ceil(log2(width))` bits).
 
 The existing implementations are all license-incompatible with MIT:
-- `g5decoder.js` in OpenEPaperLink — BSL (Business Source License)
-- `bitbank2/g5_imageconvert` — no license file
-- `bitbank2/bb_epaper` — GPLv3
+- `g5decoder.js` in OpenEPaperLink: BSL (Business Source License)
+- `bitbank2/g5_imageconvert`: no license file
+- `bitbank2/bb_epaper`: GPLv3
 
 ## Implementation approach
 
