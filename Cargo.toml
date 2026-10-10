@@ -10,6 +10,8 @@ documentation = "https://docs.rs/openepaperlink-sdk"
 readme = "README.md"
 keywords = ["openepaperlink", "oepl", "eink", "epaper", "iot"]
 categories = ["api-bindings", "hardware-support"]
+# Design docs, todos and repository tooling are not needed to build the SDK.
+exclude = [".adr-dir", "CLAUDE.md", "docs/", "todos/"]
 
 [dependencies]
 reqwest = { version = "0.13", default-features = false, features = [
